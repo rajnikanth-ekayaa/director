@@ -1,8 +1,8 @@
 
 
 //
-// Generated on Tue Dec 16 2014 12:13:47 GMT+0100 (CET) by Charlie Robbins, Paolo Fragomeni & the Contributors (Using Codesurgeon).
-// Version 1.2.6
+// Generated on Mon Jul 06 2020 01:27:03 GMT+0530 (India Standard Time) by Charlie Robbins, Paolo Fragomeni & the Contributors (Using Codesurgeon).
+// Version 1.2.8
 //
 
 (function (exports) {
@@ -287,7 +287,8 @@ Router.prototype.destroy = function () {
 };
 
 Router.prototype.getPath = function () {
-  var path = window.location.pathname;
+  //var path = window.location.pathname;
+  var path = window.location.pathname + window.location.search;
   if (path.substr(0, 1) !== '/') {
     path = '/' + path;
   }
@@ -341,7 +342,7 @@ function paramifyString(str, params, mod) {
       }
     }
   }
-  return mod === str ? "([._a-zA-Z0-9-%()]+)" : mod;
+  return mod === str ? "([._a-zA-Z0-9-%()&]+)" : mod;
 }
 
 function regifyString(str, params) {
@@ -394,7 +395,7 @@ Router.prototype.configure = function(options) {
   for (var i = 0; i < this.methods.length; i++) {
     this._methods[this.methods[i]] = true;
   }
-  this.recurse = options.recurse || this.recurse || false;
+  this.recurse = typeof options.recurse === "undefined" ? this.recurse || false : options.recurse;
   this.async = options.async || false;
   this.delimiter = options.delimiter || "/";
   this.strict = typeof options.strict === "undefined" ? true : options.strict;
@@ -460,7 +461,7 @@ Router.prototype.path = function(path, routesFn) {
 };
 
 Router.prototype.dispatch = function(method, path, callback) {
-  var self = this, fns = this.traverse(method, path.replace(QUERY_SEPARATOR, ""), this.routes, ""), invoked = this._invoked, after;
+  var self = this, fns = this.traverse(method, path, this.routes, ""), invoked = this._invoked, after;
   this._invoked = true;
   if (!fns || fns.length === 0) {
     this.last = [];
@@ -591,7 +592,7 @@ Router.prototype.traverse = function(method, path, routes, regexp, filter) {
           fns = fns.concat(next);
         }
         if (this.recurse) {
-          fns.push([ routes[r].before, routes[r].on ].filter(Boolean));
+          fns.push([ routes[r].before, routes[r][method] ].filter(Boolean));
           next.after = next.after.concat([ routes[r].after ].filter(Boolean));
           if (routes === this.routes) {
             fns.push([ routes["before"], routes["on"] ].filter(Boolean));
